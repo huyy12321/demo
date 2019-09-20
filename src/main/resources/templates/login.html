@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登陆页面</title>
+</head>
+<link rel="stylesheet" type="text/css" href="https://www.layuicdn.com/layui/css/layui.css">
+<link href="https://cdn.quilljs.com/1.0.0/quill.snow.css" rel="stylesheet">
+<style>
+    a {cursor:pointer;color:blue;}
+    #d1{position: absolute;top: 30%;left:40%;}
+    #d2{display:none;position: absolute;top:8%;left:15%;width: 70%;height: 80%; box-shadow: darkgrey 10px 10px 20px 5px ;//边框阴影}
+    #menu{width: 100%;height: 8%;font-size: 25px;border-bottom: solid 1px black;}
+    #left {width: 80%;height: 80%;display:inline-block;float:left;}
+    #content{width: 100%;height: 50%;background-color: white;overflow-y: auto;}
+    #import{width: 100%;height: 30%;border-top: solid 1px red;}
+    #right{width: 20%;height: 80%;display:inline-block;float:left;background-color: antiquewhite;}
+    #notice{width: 100%;height: 30%;}
+    #userList{width: 100%;height: 80%;background-color: white;overflow-y: auto;}
+</style>
+<body>
+<form class="layui-form" action="" id="d1">
+    <h1>进入聊天室</h1>
+    <div class="layui-form-item">
+        <div class="layui-input-inline" style="width: 200px;">
+            <input type="text"  name="title" lay-verify="title" id="name" autocomplete="off" placeholder="请输入昵称" class="layui-input">
+        </div>
+        <div class="layui-input-inline">
+            <button  type="button" class="layui-btn layui-btn-danger" id="login"><i class="layui-icon layui-icon-release"></i></button>
+        </div>
+    </div>
+</form>
+<div id="d2">
+   <div id="menu">
+       <span style="margin-left: 10px;margin-top: 5px;">xx聊天室</span>
+       <span style="margin-left: 40%;">当前昵称:</span><span id="userName" style="color: red;">hyy</span>|
+       <span>当前在线人数:</span><span id="number" style="color: red;">0</span>|
+        <a id="quit">退出</a>
+   </div>
+    <div id="left">
+        <div id="content"></div>
+        <div id="import">
+            <div id="textContent"></div>
+            <button  type="button" class="layui-btn layui-btn-danger" id="send">发送</button>
+        </div>
+    </div>
+    <div id="right">
+        <div id="notice"></div>
+        <div id="userList">
+            <div>成员:</div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script type="text/javascript" src="https://www.layuicdn.com/layui/layui.js"></script>
+<script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>
+<script type="text/javascript">
+    var toolbarOptions = [
+        ['bold', 'italic', 'underline', 'strike'],        // 切换按钮
+        ['blockquote', 'code-block'],
+
+        [{ 'header': 1 }, { 'header': 2 }],               // 用户自定义按钮值
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        [{ 'script': 'sub'}, { 'script': 'super' }],      // 上标/下标
+        [{ 'indent': '-1'}, { 'indent': '+1' }],          // 减少缩进/缩进
+        [{ 'direction': 'rtl' }],                         // 文本下划线
+
+        [{ 'size': ['small', false, 'large', 'huge'] }],  // 用户自定义下拉
+        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+
+        [{ 'color': [] }, { 'background': [] }],          // 主题默认下拉，使用主题提供的值
+        [{ 'font': [] }],
+        [{ 'align': [] }],
+
+        ['clean']                                         // 清除格式
+    ];
+
+    var editor = new Quill('#textContent', {
+        modules: { toolbar: toolbarOptions },
+        theme: 'snow'
+    });
+    var ip = "localhost:8080/";
+    //var ip = "112.74.39.252:8080/";
+    layui.use('layer', function () {
+        var layer = layui.layer;
+        var $ = layui.$;
+        var websocket = null;
+
+        $("a").hover(function(){
+            $(this).css("color","red");
+        },function(){
+            $(this).css("color","blue");
+        });
+
+        $("#quit").click(function(){
+            websocket.close();
+            $("#d1").show();
+            $("#d2").hide();
+            $("#content").html("");
+        });
+
+        $("#send").click(function(){
+            var html = document.querySelector('#textContent').children[0].innerHTML;
+            console.log(html);
+            websocket.send(html);
+            editor.pasteHTML("");
+       });
+
+        $("#login").click(function(){
+            var name = $("#name").val();
+            if(name == null || name == ""){
+                layer.msg("昵称不能为空",{icon:5});
+                return false;
+            }
+            $.ajax({
+                url:"http://"+ip+"user/login",
+                dataType:"json",
+                type:"post",
+                data:{"name":$("#name").val()},
+                success:function(data){
+                    console.log(data);
+                    if(data.code != 0){
+                        layer.msg(data.message,{icon:5});
+                        return false;
+                    }else{
+                        //判断当前浏览器是否支持WebSocket
+                        if('WebSocket' in window){
+                            websocket = new WebSocket("ws://"+ip+"websocket/"+ $("#name").val());
+                            $("#userName").text($("#name").val());
+                            $("#number").text(data.data+1);
+                        }
+                        else{
+                            alert('Not support websocket');
+                            return false;
+                        }
+                        //连接发生错误的回调方法
+                        websocket.onerror = function(){
+                            layer.msg("连接发生错误",{icon:5});
+                        };
+
+                        //连接成功建立的回调方法
+                        websocket.onopen = function(event){
+                            layer.msg("欢迎光临",{icon:6});
+                            $("#d1").hide();
+                            $("#d2").show();
+                        };
+
+                        //接收到消息的回调方法
+                        websocket.onmessage = function(event){
+                            var d = $.parseJSON(event.data);
+                            console.log(d);
+                            $("#number").text(d.number);
+                            $("#content").html($("#content").html()+"<br>"+d.message);
+                            $("#userList").html("<div>成员:</div>");
+                            for(var i = 0;i<d.userName.length;i++){
+                                $("#userList").html($("#userList").html()+"<div>"+d.userName[i]+"</div>");
+                            }
+                        };
+
+                        //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                        window.onbeforeunload = function(){
+                            websocket.close();
+                        };
+
+                        //关闭连接
+                        function quit(){
+                            websocket.close();
+                            $("#content").html("");
+                        }
+                    }
+                },error:function(){
+                   layer.msg("系统繁忙",{icon:5});
+                   return false;
+                }
+            });
+        });
+    });
+</script>
+</html>
