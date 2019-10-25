@@ -17,6 +17,7 @@
     #right{width: 20%;height: 80%;display:inline-block;float:left;background-color: antiquewhite;}
     #notice{width: 100%;height: 30%;}
     #userList{width: 100%;height: 80%;background-color: white;overflow-y: auto;}
+    #send{margin-left: 500px;}
 </style>
 <body>
 <form class="layui-form" action="" id="d1">
@@ -53,6 +54,9 @@
 </div>
 
 </body>
+    <script src="assets/jquery.min.js?v=3.3.1"></script>
+    <script src="assets/jquery-ui.min.js?v=1.12.1"></script>
+    <script src="assets/autoload.js?v=1.4.2"></script>
 <script type="text/javascript" src="https://www.layuicdn.com/layui/layui.js"></script>
 <script src="https://cdn.quilljs.com/1.0.0/quill.js"></script>
 <script type="text/javascript">
@@ -81,7 +85,6 @@
         theme: 'snow'
     });
     var ip = "localhost:8080/";
-    //var ip = "112.74.39.252:8080/";
     layui.use('layer', function () {
         var layer = layui.layer;
         var $ = layui.$;
@@ -102,10 +105,14 @@
 
         $("#send").click(function(){
             var html = document.querySelector('#textContent').children[0].innerHTML;
-            console.log(html);
             websocket.send(html);
             editor.pasteHTML("");
        });
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                $("#send").click();
+            }
+        });
 
         $("#login").click(function(){
             var name = $("#name").val();
@@ -149,13 +156,13 @@
                         //接收到消息的回调方法
                         websocket.onmessage = function(event){
                             var d = $.parseJSON(event.data);
-                            console.log(d);
                             $("#number").text(d.number);
                             $("#content").html($("#content").html()+"<br>"+d.message);
                             $("#userList").html("<div>成员:</div>");
                             for(var i = 0;i<d.userName.length;i++){
                                 $("#userList").html($("#userList").html()+"<div>"+d.userName[i]+"</div>");
                             }
+                            $("#content").scrollTop($("#content")[0].scrollHeight);
                         };
 
                         //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
@@ -177,4 +184,5 @@
         });
     });
 </script>
+
 </html>
