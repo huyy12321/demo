@@ -518,7 +518,8 @@
 <script type="text/javascript" src="https://www.layuicdn.com/layui/layui.js"></script>
 <script type="text/javascript">
     var index;
-    var ip = "localhost:8080/";
+    // var ip = "localhost:8080/";
+    var ip = "112.74.39.252:8080/";
 
     layui.use('layer', function () {
         var layer = layui.layer;
@@ -625,7 +626,6 @@
                                 return;
                             }
                             if(d.type === 2) {
-                                console.log(d);
                                 if(start !== d.start) {
                                     var obj = $("#game").find("tr").eq(d.y).find("td").eq(d.x);
                                     if(d.start === 1) {
@@ -635,6 +635,15 @@
                                     }
                                     $(obj).val(1);
                                     canClick = 1;
+                                    if(d.win === true) {
+                                        alert("你输了");
+                                        canClick = 0;
+                                    }
+                                } else{
+                                    if(d.win === true) {
+                                        alert("你赢了");
+                                        canClick = 0;
+                                    }
                                 }
                                 return;
                             }

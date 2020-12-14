@@ -138,6 +138,7 @@ public class WebSocketServer {
             }
         } else{
             waitUser.add(webSocketServer);
+            System.out.println("玩家"+webSocketServer.getName()+"加入等待队列");
         }
     }
 
@@ -146,8 +147,12 @@ public class WebSocketServer {
         int[][] game = (int[][]) o.get("game");
         WebSocketServer user1 = (WebSocketServer) o.get("user1");
         WebSocketServer user2 = (WebSocketServer) o.get("user2");
-        game[x][y] = start;
         boolean win = WebSocketServer.isWin(game, x, y, start);
+        if(win) {
+            games.remove(gameId);
+        } else{
+            game[y][x] = start;
+        }
         Map<String,Object> map = new HashMap<>();
         map.put("type",2);
         map.put("x",x);
