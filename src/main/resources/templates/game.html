@@ -518,8 +518,8 @@
 <script type="text/javascript" src="https://www.layuicdn.com/layui/layui.js"></script>
 <script type="text/javascript">
     var index;
-    // var ip = "localhost:8080/";
-    var ip = "112.74.39.252:8080/";
+    var ip = "localhost:8080/";
+    // var ip = "112.74.39.252:8080/";
 
     layui.use('layer', function () {
         var layer = layui.layer;
@@ -546,12 +546,26 @@
         });
 
         $("#start").click(function(){
+            alert(1);
             $("td").css("background","");
             $("td").val(0);
-            index = layer.load(2, {time: 10*1000});
+            index = layer.load(2);
             var msg = {type:1};
             websocket.send(JSON.stringify(msg));
+            forbidden();
        });
+
+        function forbidden(){
+            $("#start").attr("disabled","true");
+            $("#start").addClass("layui-btn-disabled");
+            $("#start").removeClass("layui-btn-danger");
+        }
+
+        function startUsing() {
+            $("#start").attr("disabled","");
+            $("#start").removeClass("layui-btn-disabled");
+            $("#start").addClass("layui-btn-danger");
+        }
 
         window.onload = function() {
             var td = document.getElementsByTagName('td');
@@ -638,11 +652,13 @@
                                     if(d.win === true) {
                                         alert("你输了");
                                         canClick = 0;
+                                        startUsing();
                                     }
                                 } else{
                                     if(d.win === true) {
                                         alert("你赢了");
                                         canClick = 0;
+                                        startUsing();
                                     }
                                 }
                                 return;

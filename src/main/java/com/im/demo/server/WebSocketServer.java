@@ -129,6 +129,7 @@ public class WebSocketServer {
                     map.put("start",1);
                     user.sendMessage(map);
                     waitUser.remove(user);
+                    log.info("玩家"+user.getName()+"移出等待队列");
                     HashMap<Object, Object> game = new HashMap<>();
                     game.put("user1",webSocketServer);
                     game.put("user2",user);
@@ -138,7 +139,7 @@ public class WebSocketServer {
             }
         } else{
             waitUser.add(webSocketServer);
-            System.out.println("玩家"+webSocketServer.getName()+"加入等待队列");
+            log.info("玩家"+webSocketServer.getName()+"加入等待队列");
         }
     }
 
