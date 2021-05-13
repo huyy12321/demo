@@ -84,7 +84,6 @@ public class WebSocketServer {
         webSocketSet.remove(this);
         // 在线数减1
         subOnlineCount();
-        waitUser.remove(this);
         System.out.println("有一连接关闭！当前在线人数为" + getOnlineCount());
     }
 
@@ -114,7 +113,7 @@ public class WebSocketServer {
     }
 
 
-    private synchronized void start(WebSocketServer webSocketServer) throws Exception{
+    private void start(WebSocketServer webSocketServer) throws Exception{
         if(waitUser.size() > 0) {
             for(WebSocketServer user : waitUser) {
                 if(!user.equals(webSocketServer)){
@@ -163,6 +162,14 @@ public class WebSocketServer {
         map.put("start",start);
         user1.sendMessage(map);
         user2.sendMessage(map);
+    }
+
+    public static void main(String[] args) {
+       int[][] a = {{1,1,1,1,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0},{0,0,0,0,0,0,0,0,0,0,0}};
+       for (int[] b : a) {
+           System.out.println(Arrays.toString(b));
+       }
+        System.out.println(WebSocketServer.isWin(a,4,0,1));
     }
 
     public static boolean isWin(int[][] game,int x,int y,int flag) {
