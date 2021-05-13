@@ -1,2 +1,2 @@
-# websocketDemo
-基于websocket,springboot实现的即使聊天系统
+# 五子棋
+基于websocket,springboot实现的五子棋
